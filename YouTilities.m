@@ -174,6 +174,11 @@ eigenStuff[matrix_,opts:OptionsPattern[{sys->Eigensystem,ai\[Lambda]->False,rref
 ]
 
 
+(* ::Input::Initialization:: *)
+CirclePlus[mat_?MatrixQ,hc]:=mat+mat\[ConjugateTranspose]
+CirclePlus[val_,cc]:=val+val\[Conjugate]
+
+
 ClearAll[enumerate]
 enumerate=MapIndexed[{#2[[1]],#1}&];
 
@@ -206,11 +211,11 @@ LocalizeAll[extra_List,except_List,code_]:=Module[{expressions,locals,f},
 expressions=List@@Map[Hold,Hold[code]/.CompoundExpression->List,{2}][[1]];
 locals=Join[
 Cases[expressions,Hold[Set[lhs_,rhs_]]:>Hold@lhs],
-Cases[expressions,Hold[SetDelayed[lhs_[vars___],rhs_]]:>Hold@lhs]
+Cases[expressions,Hold[SetDelayed[lhs_[vars___],rhs_]]:>Hold@lhs],
+extra
 ];
-Print[locals];
 f[list_List,exprs_]:=Module[list,CompoundExpression@@(ReleaseHold/@exprs)];
-f[ReleaseHold@locals,expressions]
+f[Complement[ReleaseHold@locals,except],expressions]
 ]
 
 
