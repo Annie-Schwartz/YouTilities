@@ -207,15 +207,15 @@ Charting$InteractiveHighlighting=False;
 (* ::Input::Initialization:: *)
 ClearAll[LocalizeAll];
 SetAttributes[LocalizeAll,HoldAll];
-LocalizeAll[extra_List,except_List,code_]:=Module[{expressions,locals,f},
+LocalizeAll[extra_List,except_List,code_]:=Module[{expressions,locals,f,extractList},
 expressions=List@@Map[Hold,Hold[code]/.CompoundExpression->List,{2}][[1]];
 locals=Join[
-Cases[expressions,Hold[Set[lhs_,rhs_]]:>Hold@lhs],
-Cases[expressions,Hold[SetDelayed[lhs_[vars___],rhs_]]:>Hold@lhs],
+Cases[expressions,Hold[Set[lhs_,rhs_]]:>Sequence@@lhs],
+Cases[expressions,Hold[SetDelayed[lhs_[vars___],rhs_]]:>lhs],
 extra
 ];
 f[list_List,exprs_]:=Module[list,CompoundExpression@@(ReleaseHold/@exprs)];
-f[Complement[ReleaseHold@locals,except],expressions]
+f[Complement[locals,except],expressions]
 ]
 
 
