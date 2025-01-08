@@ -121,7 +121,7 @@ insertGradient[name_,gradColors_]:=If[
 	)
 ]
 Module[{data,names,colors},
-	data=Import["https://raw.githubusercontent.com/Andrew-Schwartz/YouTilities/master/flags.tsv","TSV","Numeric"->False];
+	data=Import["https://raw.githubusercontent.com/Annie-Schwartz/YouTilities/master/flags.tsv","TSV","Numeric"->False];
 	names=#<>"Flag"&/@data[[;;,1]];
 	colors=Map[RGBColor["#"<>#]&,data[[;;,2;;]],{2}];
 	
@@ -211,8 +211,8 @@ LocalizeAll[extra_List,except_List,code_]:=Module[{expressions,locals},
 expressions=List@@Map[Hold,Hold[code]/.CompoundExpression->List,{2}][[1]];
 locals=Complement[
 Join@@Join[
-Cases[expressions,Hold[Set[lhs_,rhs_]]:>Switch[lhs,
-_List,Sequence@@Map[Hold,Hold[lhs],{2}][[1]],
+Cases[expressions,Hold[Set[lhs_,rhs_]]:>Switch[Hold[lhs],
+Hold[_List],Sequence@@Map[Hold,Hold[lhs],{2}][[1]],
 _,Hold[lhs]
 ]],
 Cases[expressions,Hold[SetDelayed[lhs_[vars___],rhs_]]:>Hold@lhs],
@@ -222,6 +222,13 @@ Hold@@except
 ]/.Hold[locals__]:>Hold[{locals}];
 Module@@Hold[Evaluate[Unevaluated@@locals],code]
 ]
+
+
+StringPrepend[rest_,pre_]:=pre<>ToString@rest
+StringPrepend[pre_][rest_]:=StringPrepend[rest,pre]
+
+StringAppend[rest_,app_]:=ToString@rest<>app
+StringAppend[app_][rest_]:=StingAppend[rest,app]
 
 
 
