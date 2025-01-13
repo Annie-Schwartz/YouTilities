@@ -179,6 +179,10 @@ CirclePlus[mat_?MatrixQ,hc]:=mat+mat\[ConjugateTranspose]
 CirclePlus[val_,cc]:=val+val\[Conjugate]
 
 
+(* ::Input::Initialization:: *)
+LoadBra[]:=Bra[{labels__}]:=Ket[{labels}]\[Conjugate]
+
+
 ClearAll[enumerate]
 enumerate=MapIndexed[{#2[[1]],#1}&];
 
