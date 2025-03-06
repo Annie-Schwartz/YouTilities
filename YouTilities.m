@@ -202,8 +202,8 @@ ClearAll[LocalizeAll];
 SetAttributes[LocalizeAll,HoldAll];
 LocalizeAll[extra_List,except_List,code_]:=Module[{expressions,locals},
 expressions=List@@Map[Hold,Hold[code]/.CompoundExpression->List,{2}][[1]];
-Echo[FullForm@expressions];
-Echo[Hold@@Hold[except][[;;]]];
+(*Echo[FullForm@expressions];
+Echo[Hold@@Hold[except][[;;]]];*)
 locals=Complement[
 Join@@Join[
 (* lhs=rhs *)
@@ -226,8 +226,8 @@ Hold/@extra
 ],
 Hold@@except
 ]/.Hold[locals__]:>Hold[{locals}];
-Echo@locals;
-(*Module@@*)Hold[Evaluate[Unevaluated@@locals],code]
+(*Echo@locals;*)
+Module@@Hold[Evaluate[Unevaluated@@locals],code]
 ]
 
 
