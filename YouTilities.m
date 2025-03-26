@@ -166,6 +166,20 @@ CirclePlus[val_,cc]:=val+val\[Conjugate]
 LoadBra[]:=Bra[{labels__}]:=Ket[{labels}]\[Conjugate]
 
 
+(* ::Input::Initialization:: *)
+LoadArbitrarySpinMatricesJ[S_,type_:"n",chain_:1]:=If[Length@DownValues@LoadArbitrarySpinMatrices==0,
+"Please make sure to load Melt before running LoadArbitrarySpinMatricesJ!",
+Block[{S0,Sx,Sy,Sz,Sp,Sm,\[ScriptCapitalS]x,\[ScriptCapitalS]y,\[ScriptCapitalS]z,\[ScriptCapitalS]p,\[ScriptCapitalS]m},
+LoadArbitrarySpinMatrices[S,type,chain];
+J0=S0;Jx=Sx;Jy=Sy;Jz=Sz;Jp=Sp;Jm=Sm;
+If[chain===1,
+"Matrices loaded: J0 (=1), Jx, Jy, Jz, Jp, Jm",
+\[ScriptCapitalJ]0=\[ScriptCapitalS]0;\[ScriptCapitalJ]x=\[ScriptCapitalS]x;\[ScriptCapitalJ]y=\[ScriptCapitalS]y;\[ScriptCapitalJ]z=\[ScriptCapitalS]z;\[ScriptCapitalJ]p=\[ScriptCapitalS]p;\[ScriptCapitalJ]m=\[ScriptCapitalS]m;"Matrices loaded: \[ScriptCapitalJ]0 (=1), \[ScriptCapitalJ]x, \[ScriptCapitalJ]y, \[ScriptCapitalJ]z, \[ScriptCapitalJ]p, \[ScriptCapitalJ]m"
+]
+]
+]
+
+
 ClearAll[enumerate]
 enumerate=MapIndexed[{#2[[1]],#1}&];
 
