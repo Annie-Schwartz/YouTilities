@@ -202,6 +202,15 @@ Charting$InteractiveHighlighting=False;
 
 
 (* ::Input::Initialization:: *)
+Subscript[l_List,seq]:=Sequence@@l
+
+
+(* ::Input::Initialization:: *)
+Subscript[s_String,sf][exprs__]:=StringForm[s,exprs]
+Subscript[s_String,st]:=StringTemplate[s]
+
+
+(* ::Input::Initialization:: *)
 ClearAll[WithWith]
 SetAttributes[WithWith,HoldAll]
 WithWith[list_List,body_]:=Fold[
