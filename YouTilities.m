@@ -221,6 +221,12 @@ Reverse@First@Map[Hold,Hold@list,{2}]
 
 
 (* ::Input::Initialization:: *)
+ClearAll[Eat]
+SetAttributes[Eat,HoldAll]
+Eat[symbs_List,body_]:=Block[symbs,body;symbs]
+
+
+(* ::Input::Initialization:: *)
 ClearAll[LocalizeAll];
 SetAttributes[LocalizeAll,HoldAll];
 LocalizeAll[extra_List,except_List,code_]:=Module[{expressions,locals},
