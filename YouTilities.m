@@ -113,8 +113,8 @@ Module[{data,names,colors},
 
 
 (* ::Input::Initialization:: *)
-EigvecsT[A_,neigs_:"all",\[CapitalDelta]_:10^5]:=Transpose@Eigvecs[A,neigs,\[CapitalDelta]]
-EigsysT[A_,neigs_:"all",\[CapitalDelta]_:10^5]:=MapThread[#1@#2&,{{Identity,Transpose},Eigsys@A}]
+EigvecsT[A_,neigs_:"all",\[CapitalDelta]_:Automatic]:=Transpose@Eigvecs[A,neigs,\[CapitalDelta]]
+EigsysT[A_,neigs_:"all",\[CapitalDelta]_:Automatic]:=MapThread[#1@#2&,{{Identity,Transpose},Eigsys[A,neigs,\[CapitalDelta]]}]
 
 
 (* Exponentiate with something other than Times (useful for matrix powers with Dot) *)
@@ -172,6 +172,7 @@ LoadArbitrarySpinMatricesJ[S_,type_:"n",chain_:1]:=If[Length@DownValues@LoadArbi
 "Please make sure to load Melt before running LoadArbitrarySpinMatricesJ!",
 (*{J0,Jx,Jy,Jz,Jp,Jm,\[ScriptCapitalJ]x,\[ScriptCapitalJ]y,\[ScriptCapitalJ]z,\[ScriptCapitalJ]p,\[ScriptCapitalJ]m}=Eat[{S0,Sx,Sy,Sz,Sp,Sm,\[ScriptCapitalS]x,\[ScriptCapitalS]y,\[ScriptCapitalS]z,\[ScriptCapitalS]p,\[ScriptCapitalS]m},LoadArbitrarySpinMatrices[S,type,chain]];*)
 Block[{S0,Sx,Sy,Sz,Sp,Sm,\[ScriptCapitalS]x,\[ScriptCapitalS]y,\[ScriptCapitalS]z,\[ScriptCapitalS]p,\[ScriptCapitalS]m},
+ClearAll[J0,Jx,Jy,Jz,Jp,Jm];
 LoadArbitrarySpinMatrices[S,type,chain];
 J0=S0;Jx=Sx;Jy=Sy;Jz=Sz;Jp=Sp;Jm=Sm;
 If[chain===1,
