@@ -164,7 +164,10 @@ CirclePlus[val_,cc]:=val+val\[Conjugate]
 
 
 (* ::Input::Initialization:: *)
-LoadBra[]:=Bra[{labels__}]:=Ket[{labels}]\[Conjugate]
+LoadBra[]:=(
+Bra[{labels__}]:=Ket[{labels}]\[Conjugate];
+BraKet[{a__},{b__}]:=Bra[{a}]\[Conjugate] . Ket[{b}];
+)
 
 
 (* ::Input::Initialization:: *)
