@@ -235,6 +235,8 @@ Eat[symbs_List,body_]:=Block[symbs,body;symbs]
 (* ::Input::Initialization:: *)
 ClearAll[LocalizeAll];
 SetAttributes[LocalizeAll,HoldAll];
+LocalizeAll[code_]:=LocalizeAll[{},{},code]
+LocalizeAll[extra_List,code_]:=LocalizeAll[extra,{},code]
 LocalizeAll[extra_List,except_List,code_]:=Module[{expressions,locals},
 expressions=List@@Map[Hold,Hold[code]/.CompoundExpression->List,{2}][[1]];
 (*Echo[FullForm@expressions];
