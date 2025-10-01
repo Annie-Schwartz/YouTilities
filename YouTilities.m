@@ -118,8 +118,8 @@ EigsysT[A_,neigs_:"all",\[CapitalDelta]_:Automatic]:=MapThread[#1@#2&,{{Identity
 
 
 (* Exponentiate with something other than Times (useful for matrix powers with Dot) *)
-Subscript/:Power[Subscript[mat_,mp],n_Integer]:=MatrixPower[mat,n]
-Subscript/:Power[Subscript[mat_,Dot],n_Integer]:=MatrixPower[mat,n]
+Subscript/:Power[Subscript[mat_,mp],n_]:=MatrixPower[mat,n]
+Subscript/:Power[Subscript[mat_,Dot],n_]:=MatrixPower[mat,n]
 
 
 ClearAll@eigenStuff
