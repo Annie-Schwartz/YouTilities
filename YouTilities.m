@@ -191,7 +191,7 @@ ClearAll[BlockDiagonalizer]
 BlockDiagonalizer[ops__]:=Module[{os=Reverse@{ops},U},
 U=BlockDiagonalizer@First@os;
 Do[
-U=U . BlockDiagonalizer[U\[ConjugateTranspose] . os[[idx]] . U],
+U=U . BlockDiagonalizer[Inverse[U] . os[[idx]] . U],
 {idx,2,Length@os}
 ];
 U
@@ -199,7 +199,7 @@ U
 BlockDiagonalizer[op_]:=LocalizeAll[{},{},
 {\[Lambda]s,vs}=Eigensystem@op;
 evals=Sort[DeleteDuplicates@\[Lambda]s,Greater];
-Transpose@flat1@Table[
+Inverse@flat1@Table[
 Normalize/@vs[[Flatten@Position[\[Lambda]s,\[Lambda]]]],
 {\[Lambda],evals}
 ]
