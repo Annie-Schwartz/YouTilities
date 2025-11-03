@@ -198,12 +198,16 @@ U
 ]
 BlockDiagonalizer[op_]:=LocalizeAll[{},{},
 {\[Lambda]s,vs}=Eigensystem@op;
+Transpose@vs[[Ordering[\[Lambda]s,All,Greater]]]
+]
+(*BlockDiagonalizer[op_]:=LocalizeAll[{},{},
+{\[Lambda]s,vs}=Eigensystem@op;
 evals=Sort[DeleteDuplicates@\[Lambda]s,Greater];
-Inverse@flat1@Table[
+Transpose@flat1@Table[
 Normalize/@vs[[Flatten@Position[\[Lambda]s,\[Lambda]]]],
 {\[Lambda],evals}
 ]
-]
+]*)
 
 
 (* ::Input::Initialization:: *)
