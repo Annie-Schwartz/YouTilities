@@ -186,6 +186,41 @@ If[chain===1,
 ]
 
 
+(* ::Input::Initialization:: *)
+ClearAll[BlockDiagonalizer]
+BlockDiagonalizer[ops__]:=Module[{os=Reverse@{ops},U},
+U=BlockDiagonalizer@First@os;
+Do[
+U=U . BlockDiagonalizer[U\[ConjugateTranspose] . os[[idx]] . U],
+{idx,2,Length@os}
+];
+U
+]
+BlockDiagonalizer[op_]:=LocalizeAll[{},{},
+{\[Lambda]s,vs}=Eigensystem@op;
+evals=Sort[DeleteDuplicates@\[Lambda]s,Greater];
+Transpose@flat1@Table[
+Normalize/@vs[[Flatten@Position[\[Lambda]s,\[Lambda]]]],
+{\[Lambda],evals}
+]
+]
+
+
+(* ::Input::Initialization:: *)
+ClearAll[BlockEigvals]
+BlockEigvals[mat_,U_]:=With[{Ui=Inverse@U},
+Eigvals[Ui . mat . U]
+]
+(*BlockEigvals2[mat_,U_]:=With[{Ui=Inverse@U},
+Eigvals[BlockDiagonalMatrix[Ui.mat.U]]
+]*)
+
+
+(* ::Input::Initialization:: *)
+ClearAll[PrePrintMatrixForm]
+PrePrintMatrixForm=If[MatrixQ@#,MatrixForm@#,#]&;
+
+
 ClearAll[enumerate]
 enumerate=MapIndexed[{#2[[1]],#1}&];
 
@@ -212,8 +247,31 @@ Subscript[l_List,seq]:=Sequence@@l
 
 
 (* ::Input::Initialization:: *)
+ClearAll[Benchmark]
+Benchmark[fns_List,ns_List,nToInput_]:=Transpose@table[
+With[{input=nToInput@n},
+Table[{n,RepeatedTiming[fn@nToInput@n][[1]]},{fn,fns}]
+],
+{n,ns}
+]
+
+
+(* ::Input::Initialization:: *)
 Subscript[s_String,sf][exprs__]:=StringForm[s,exprs]
 Subscript[s_String,st]:=StringTemplate[s]
+
+
+StringPrepend[rest_,pre_]:=pre<>ToString@rest
+StringPrepend[pre_][rest_]:=StringPrepend[rest,pre]
+
+StringAppend[rest_,app_]:=ToString@rest<>app
+StringAppend[app_][rest_]:=StingAppend[rest,app]
+
+
+(* ::Input::Initialization:: *)
+ClearAll[Eat]
+SetAttributes[Eat,HoldAll]
+Eat[symbs_List,body_]:=Block[symbs,body;symbs]
 
 
 (* ::Input::Initialization:: *)
@@ -224,12 +282,6 @@ ReplaceAll[{Hold[hinner_],Hold[hvar_]}->Hold@With[{hvar},hinner]]@*List,
 Hold@body,
 Reverse@First@Map[Hold,Hold@list,{2}]
 ]//ReleaseHold
-
-
-(* ::Input::Initialization:: *)
-ClearAll[Eat]
-SetAttributes[Eat,HoldAll]
-Eat[symbs_List,body_]:=Block[symbs,body;symbs]
 
 
 (* ::Input::Initialization:: *)
@@ -266,13 +318,6 @@ Hold@@except
 (*Echo@locals;*)
 Module@@Hold[Evaluate[Unevaluated@@locals],code]
 ]
-
-
-StringPrepend[rest_,pre_]:=pre<>ToString@rest
-StringPrepend[pre_][rest_]:=StringPrepend[rest,pre]
-
-StringAppend[rest_,app_]:=ToString@rest<>app
-StringAppend[app_][rest_]:=StingAppend[rest,app]
 
 
 
