@@ -212,9 +212,12 @@ Normalize/@vs[[Flatten@Position[\[Lambda]s,\[Lambda]]]],
 
 (* ::Input::Initialization:: *)
 ClearAll[BlockEigvals]
-BlockEigvals[mat_,U_]:=With[{Ui=Inverse@U},
-Eigvals[Ui . mat . U]
+BlockEigvals[U_]:=With[{Ui=Inverse@U},
+Eigvals[Ui . # . U]&
 ]
+(*BlockEigvals[mat_,U_]:=With[{Ui=Inverse@U},
+Eigvals[Ui.mat.U]
+]*)
 (*BlockEigvals2[mat_,U_]:=With[{Ui=Inverse@U},
 Eigvals[BlockDiagonalMatrix[Ui.mat.U]]
 ]*)
@@ -252,7 +255,7 @@ Subscript[l_List,seq]:=Sequence@@l
 
 (* ::Input::Initialization:: *)
 ClearAll[Benchmark]
-Benchmark[fns_List,ns_List,nToInput_]:=Transpose@table[
+Benchmark[fns_List,ns_List,nToInput_,OptionsPattern[{RefImpl->1,CorrectTest->None}]]:=Transpose@table[
 With[{input=nToInput@n},
 Table[{n,RepeatedTiming[fn@nToInput@n][[1]]},{fn,fns}]
 ],
