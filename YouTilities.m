@@ -225,7 +225,7 @@ Eigvals[BlockDiagonalMatrix[Ui.mat.U]]
 
 (* ::Input::Initialization:: *)
 ClearAll[PrePrintMatrixForm]
-PrePrintMatrixForm=If[MatrixQ@#,MatrixForm@#,#]&;
+PrePrintMatrixForm=If[MatrixQ@#&&!MatchQ[#,_BlockDiagonalMatrix],MatrixForm@#,#]&;
 
 
 ClearAll[enumerate]
@@ -325,6 +325,4 @@ Hold@@except
 (*Echo@locals;*)
 Module@@Hold[Evaluate[Unevaluated@@locals],code]
 ]
-
-
 
