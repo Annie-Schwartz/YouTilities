@@ -61,7 +61,7 @@ saveDirectory[]:=Module[
 	{dir=FileNameJoin@{NotebookDirectory[],"mathematica_figures"}},
 	If[
 		!DirectoryQ@dir,
-		CreateDirectory[FileNameJoin@{NotebookDirectory[],"mathematica_figures"}],
+		CreateDirectory[dir],
 		dir
 	]
 ]
@@ -187,6 +187,25 @@ If[chain===1,
 
 
 (* ::Input::Initialization:: *)
+ClearAll[Sectorize]
+Sectorize[H_,syms_]:=Module[{\[DoubleStruckCapitalI]=IdentityMatrix@Length@H,bd=Transpose@*Eigenvectors,U,Hbd},
+(*bd[o_]:=With[{\[Lambda]svs=Eigensystem@o},
+Transpose@\[Lambda]svs[[2]][[Ordering[\[Lambda]svs[[1]],All,Greater]]]
+];*)
+U=bd@Last@syms;
+Do[
+U=U . bd[Inverse[U] . sym . U],
+{sym,Rest@Reverse@syms}
+];
+(* BlockDiagonalMatrix really hates it if there is a 0 block. So, add 1 before using BDM, then subtract 1 from each block before putting it back together.
+	And yes, just subtracting 1 from the full BDM makes it mad too.
+ *)
+Hbd=BlockDiagonalMatrix[#-IdentityMatrix@Length@#&/@BlockDiagonalMatrix[Simplify[Inverse[U] . H . U]+\[DoubleStruckCapitalI]]["Blocks"]];
+
+]
+
+
+(* ::Input::Initialization:: *)
 ClearAll[BlockDiagonalizer]
 BlockDiagonalizer[ops__]:=Module[{os=Reverse@{ops},U},
 U=BlockDiagonalizer@First@os;
@@ -246,9 +265,6 @@ SparseReplaceAll[s_SparseArray,rule_]:=With[{
 ]
 
 
-Charting$InteractiveHighlighting=False;
-
-
 (* ::Input::Initialization:: *)
 Subscript[l_List,seq]:=Sequence@@l
 
@@ -292,6 +308,23 @@ Reverse@First@Map[Hold,Hold@list,{2}]
 
 
 (* ::Input::Initialization:: *)
+ClearAll[cacheDirectory,cacheFile,cache,load,alsoCache,listCached]
+cacheDirectory[source_:Automatic]:=FileNameJoin@{NotebookDirectory[],"mathematica_data",source/.Automatic->FileBaseName@NotebookFileName[]}
+cacheFile[name_,source_:Automatic]:=Module[
+	{file=FileNameJoin@{cacheDirectory[source],StringJoin[name,".mx"]}},
+	If[
+		!FileExistsQ@file,
+		CreateFile[file],
+		file
+	]
+]
+cache[data_,name_,source_:Automatic]:=Export[cacheFile[name,source],data]
+load[name_,source_:Automatic]:=Import[cacheFile[name,source]]
+alsoCache[name_,source_:Automatic]:=also[cache[#,name,source]&]
+listCached[source_:Automatic]:=FileBaseName/@FileNames[All,cacheDirectory[source]]
+
+
+(* ::Input::Initialization:: *)
 ClearAll[LocalizeAll];
 SetAttributes[LocalizeAll,HoldAll];
 LocalizeAll[code_]:=LocalizeAll[{},{},code]
@@ -325,4 +358,6 @@ Hold@@except
 (*Echo@locals;*)
 Module@@Hold[Evaluate[Unevaluated@@locals],code]
 ]
+
+
 
