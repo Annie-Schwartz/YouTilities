@@ -271,7 +271,8 @@ Subscript[l_List,seq]:=Sequence@@l
 
 (* ::Input::Initialization:: *)
 ClearAll[AdaptiveSample]
-AdaptiveSample[HoldPattern@f_,{x_,xmin_,xmax_,n_},maxRecursion_:2]:=Sort@Last@Last@Reap[Plot[y=Hold@f,{x,xmin,xmax},PlotPoints->n,MaxRecursion->maxRecursion,EvaluationMonitor:>Sow@{x,y}]]
+SetAttributes[AdaptiveSample,HoldAll]
+AdaptiveSample[HoldPattern@f_,{x_,xmin_,xmax_,n_},maxRecursion_:3]:=Sort@Last@Last@Reap[Plot[y=Hold@f,{x,xmin,xmax},PlotPoints->n,MaxRecursion->maxRecursion,EvaluationMonitor:>Sow@{x,y}]]
 
 
 (* ::Input::Initialization:: *)
