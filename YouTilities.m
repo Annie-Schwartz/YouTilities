@@ -272,7 +272,9 @@ Subscript[l_List,seq]:=Sequence@@l
 (* ::Input::Initialization:: *)
 ClearAll[AdaptiveTable]
 SetAttributes[AdaptiveTable,HoldAll]
-AdaptiveTable[HoldPattern@f_,{x_,xmin_,xmax_,n_},maxRecursion_:6]:=With[{if=Quiet@FunctionInterpolation[f,{x,xmin,xmax},InterpolationPoints->n,MaxRecursion->maxRecursion]},
+AdaptiveTable[HoldPattern@f_,{x_,xmin_,xmax_,n_},maxRecursion_:6]:=Module[{g,if},
+g[xx_?NumericQ]:=f/.x->xx;
+if=Quiet@FunctionInterpolation[g[x],{x,xmin,xmax},InterpolationPoints->n,MaxRecursion->maxRecursion];
 {Flatten[if["Grid"]],if["ValuesOnGrid"]}\[Transpose]
 ]
 
