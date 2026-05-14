@@ -270,9 +270,11 @@ Subscript[l_List,seq]:=Sequence@@l
 
 
 (* ::Input::Initialization:: *)
-ClearAll[AdaptiveSample]
-SetAttributes[AdaptiveSample,HoldAll]
-AdaptiveSample[HoldPattern@f_,{x_,xmin_,xmax_,n_},maxRecursion_:3]:=Sort@Last@Last@Reap[Plot[y=Hold@f,{x,xmin,xmax},PlotPoints->n,MaxRecursion->maxRecursion,EvaluationMonitor:>Sow@{x,y}]]
+ClearAll[AdaptiveTable]
+SetAttributes[AdaptiveTable,HoldAll]
+AdaptiveTable[HoldPattern@f_,{x_,xmin_,xmax_,n_},maxRecursion_:6]:=With[{if=Quiet@FunctionInterpolation[f,{x,xmin,xmax},InterpolationPoints->n,MaxRecursion->maxRecursion]},
+{Flatten[if["Grid"]],if["ValuesOnGrid"]}\[Transpose]
+]
 
 
 (* ::Input::Initialization:: *)
