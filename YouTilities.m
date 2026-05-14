@@ -270,6 +270,11 @@ Subscript[l_List,seq]:=Sequence@@l
 
 
 (* ::Input::Initialization:: *)
+ClearAll[AdaptiveSample]
+AdaptiveSample[HoldPattern@f_,{x_,xmin_,xmax_,n_},maxRecursion_:2]:=Sort@Last@Last@Reap[Plot[y=Hold@f,{x,xmin,xmax},PlotPoints->n,MaxRecursion->maxRecursion,EvaluationMonitor:>Sow@{x,y}]]
+
+
+(* ::Input::Initialization:: *)
 ClearAll[Benchmark]
 Benchmark[fns_List,ns_List,nToInput_,OptionsPattern[{RefImpl->1,CorrectTest->None}]]:=Transpose@table[
 With[{input=nToInput@n},
