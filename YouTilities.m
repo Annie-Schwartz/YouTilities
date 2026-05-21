@@ -280,6 +280,27 @@ if=Quiet@FunctionInterpolation[g[x],{x,xmin,xmax},InterpolationPoints->n,MaxRecu
 
 
 (* ::Input::Initialization:: *)
+ClearAll[TableN]
+SetAttributes[TableN,HoldAll];
+TableN[expr_,lists__]:=Module[{vars,ls},
+vars=Extract[Hold@lists,{All,1}];
+ls=List@@Extract[Hold@lists,{All,2}];
+If[!AllSameBy[ls,Length],Throw["All lists must be the same length!"]];
+ReplaceAll[
+Hold[expr],
+s_Symbol/;MemberQ[vars,Unevaluated@s]:>With[{eval=Extract[ls,First@Position[vars,Unevaluated@s]][[2]]},eval/;True]
+];
+ReleaseHold@Table[
+ReplaceAll[
+Hold[expr],
+s_Symbol/;MemberQ[vars,Unevaluated@s]:>With[{eval=Extract[ls,First@Position[vars,Unevaluated@s]][[idx]]},eval/;True]
+],
+{idx,Length@ls[[1]]}
+]
+]
+
+
+(* ::Input::Initialization:: *)
 ClearAll[Benchmark]
 Benchmark[fns_List,ns_List,nToInput_,OptionsPattern[{RefImpl->1,CorrectTest->None}]]:=Transpose@table[
 With[{input=nToInput@n},
