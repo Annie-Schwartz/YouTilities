@@ -286,10 +286,6 @@ TableN[expr_,lists__]:=Module[{vars,ls},
 vars=Extract[Hold@lists,{All,1}];
 ls=List@@Extract[Hold@lists,{All,2}];
 If[!AllSameBy[ls,Length],Throw["All lists must be the same length!"]];
-ReplaceAll[
-Hold[expr],
-s_Symbol/;MemberQ[vars,Unevaluated@s]:>With[{eval=Extract[ls,First@Position[vars,Unevaluated@s]][[2]]},eval/;True]
-];
 ReleaseHold@Table[
 ReplaceAll[
 Hold[expr],
@@ -353,6 +349,30 @@ cache[data_,name_,source_:Automatic]:=Export[cacheFile[name,source],data]
 load[name_,source_:Automatic]:=Import[cacheFile[name,source]]
 alsoCache[name_,source_:Automatic]:=also[cache[#,name,source]&]
 listCached[source_:Automatic]:=FileBaseName/@FileNames[All,cacheDirectory[source]]
+
+
+(* ::Input::Initialization:: *)
+ClearAll[cachePlotData,alsoCachePlotData,loadPlotData]
+SetAttributes[cachePlotData,HoldFirst]
+cachePlotData[plot_,name_,source_:Automatic]:=Module[{vars,values},
+vars=System`Utilities`SymbolList[Hold[plot],Hold,{"System`"}];
+values=ReleaseHold@vars;
+cache[{vars,values},"plot_data_"<>name,source];
+plot
+]
+alsoCachePlotData[name_,source_:Automatic]:=Module[{f},
+SetAttributes[f,HoldFirst];
+f[plot_]:=cachePlotData[plot,name,source];
+f
+]
+(* TODO maybe check if all symbols needed are available in the context this is being loaded into? *)
+loadPlotData[name_,source_:Automatic]:=Module[{vv},
+vv=load["plot_data_"<>name,source];
+Table[
+With[{v=ReleaseHold@vv[[1,i]]},Set[v,vv[[2,i]]]],
+{i,Length@vv}
+]
+]
 
 
 (* ::Input::Initialization:: *)
