@@ -80,8 +80,41 @@ tableHeadedRows[rows_][list_]:=TableForm[list,TableHeadings->{rows,None}]
 tableHeadedCols[cols_][list_]:=TableForm[list,TableHeadings->{None,cols}]
 
 
-defaultColorData[]:=ColorData[97]
-defaultColorData[n_Integer]:=defaultColorData[][n]
+(* https://mathematica.stackexchange.com/questions/54629/what-are-the-standard-colors-for-plots-in-mathematica-10 *)
+ClearAll[defaultColorData]
+defaultColorData=ColorData@Which[
+	$VersionNumber>=14.2,"DefaultPlotColors",
+	$VersionNumber>=10,97,
+	True,1
+];
+
+
+(* ::Input::Initialization:: *)
+ClearAll[plotStyle,PlotColors]
+(* TODO: it might be better/possible to scan through the args & combine with any existing PlotStyle? *)
+PlotColors/:f_[fns_,args___,PlotColors[colors_],args2___]:=With[{cols=plotStyle[colors,fns]},
+f[fns,args,PlotStyle->cols,args2]
+]
+plotStyle[colors_,fns_]:=Module[{
+cfun=Switch[colors,
+_ColorDataFunction,colors,
+_,ColorData[colors]
+],
+ctype,
+n=Length@fns
+},
+If[!MatchQ[cfun,_ColorDataFunction],
+Throw[Subscript["`` is not a known color data", sf]@colors,Module]
+];
+ctype=cfun[[2]];
+Which[
+ctype=="Gradients",cfun/@Subdivide[Subscript[cfun[[3]], seq],n-1],
+ctype=="Indexed",cfun/@Range@n,
+ctype=="Named",Throw@"TODO: Named",
+ctype=="Physical",Throw@"TODO: Physical",
+True,Throw@"Error"
+]
+]
 
 
 (* Pride Flags! *)
@@ -251,7 +284,6 @@ ClearAll[enumerate]
 enumerate=MapIndexed[{#2[[1]],#1}&];
 
 
-(* https://mathematica.stackexchange.com/a/154287 *)
 SparseReplaceAll[s_SparseArray,rule_]:=With[{
 		elems=ReplaceAll[s["NonzeroValues"],rule],
 		default=ReplaceAll[s["Background"],rule]
@@ -297,12 +329,90 @@ s_Symbol/;MemberQ[vars,Unevaluated@s]:>With[{eval=Extract[ls,First@Position[vars
 
 
 (* ::Input::Initialization:: *)
-ClearAll[Benchmark]
-Benchmark[fns_List,ns_List,nToInput_,OptionsPattern[{RefImpl->1,CorrectTest->None}]]:=Transpose@table[
-With[{input=nToInput@n},
-Table[{n,RepeatedTiming[fn@nToInput@n][[1]]},{fn,fns}]
+ClearAll[Benchmark,BenchmarkOutput]
+Benchmark[fns_List,ns_List,OptionsPattern[{InputFromN->Identity,Timer->RepeatedTiming,RefImpl->1,CorrectTest->None,NLimits-><||>}]]:=Module[{
+inputFromN=OptionValue[InputFromN],
+refImpl=OptionValue[RefImpl],
+correctTest=OptionValue[CorrectTest],
+timer=OptionValue[Timer],
+nLimits=OptionValue[NLimits],
+timings,
+outputs,
+wrong,
+debugReturn
+},
+{timings,outputs}=Transpose[table[
+With[{input=inputFromN@n},
+Table[(*
+Print[fns[[fnIdx]]];*)
+If[n<=Lookup[nLimits,fnIdx,\[Infinity]],timer@fns[[fnIdx]]@input,{None,None}],
+{fnIdx,Length@fns}
+]
 ],
 {n,ns}
+],
+{3,2,1}
+];
+wrong=If[correctTest=!=None,
+ref=outputs[[refImpl]];
+Position[
+Table[
+TableN[
+rf==None||o==None||correctTest[rf,o],
+{rf,ref},
+{o,output}
+],
+{output,outputs}
+],
+Except[True],
+{2},
+Heads->False
+],
+{}
+];
+debugReturn=If[Length[wrong]!=0,
+KeyValueMap[
+Print@Subscript["Error! `` is wrong (`` times)", sf][fns[[#1]],Length@#2]&,
+GroupBy[wrong,First]
+];
+Print["Use Benchmark[...][\"Errors\"] for more information"];
+{wrong,outputs,refImpl},
+{}
+];
+BenchmarkOutput[ns,fns,timings,Subscript[debugReturn, seq]]
+]
+(*Format[BenchmarkOutput[timings]]:="Benchmarking results"*)
+BenchmarkOutput[ns_,fns_,timings_,___][]:=timings
+BenchmarkOutput[ns_,fns_,timings_,wrong_:None,___]["Plot",args___]:=Module[{points={ns,#}\[Transpose]&/@timings},
+(*Print@MatrixForm@points;*)
+ListLogLogPlot[points,PlotLegends->fns,AxesLabel->{"n","time (seconds)"},PlotRange->All,Joined->True,args,PlotLabel->ToString@wrong]
+]
+BenchmarkOutput[ns_,fns_,___][Tabular,data_]:=Tabular[
+ToTabular[
+Join[{ns},data],
+"Columns",
+<|"ColumnKeys"->Join[{"n"},fns]|>
+],
+{"KeyColumns"->"n"},
+ItemDisplayFunction->(#1/.None|0->""&)
+]
+BenchmarkOutput[ns_,fns_,timings_,___]["Summary"]:=BenchmarkOutput[ns,fns][Tabular,timings]
+BenchmarkOutput[ns_,fns_,timings_,wrong_:None,outputs_:None,refImpl_:None]["Errors"]:=If[wrong===None,
+"All implementations match!",
+Module[{dropAll,fnsDrop,nsDrop,mask},
+dropAll[expr_,seqs_]:=Fold[Drop,expr,Reverse@Sort@seqs];
+mask=Normal[outputs SparseArray[Thread[wrong->1],{Length@fns,Length@ns}]];
+fnsDrop=Position[mask,Table[0,Dimensions[mask][[2]]]];
+mask=dropAll[mask,fnsDrop]\[Transpose];
+nsDrop=Position[mask,Table[0,Dimensions[mask][[2]]]];
+mask=dropAll[mask,nsDrop];
+BenchmarkOutput[
+dropAll[ns,nsDrop],
+Join[{"Correct"},dropAll[fns,fnsDrop]]
+][Tabular,
+Join[{dropAll[outputs[[refImpl]],nsDrop]},mask\[Transpose]]
+]
+]
 ]
 
 
